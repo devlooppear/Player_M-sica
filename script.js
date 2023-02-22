@@ -5,6 +5,7 @@ const cover = document.getElementById('cover');
 const play = document.getElementById('play');
 const next = document.getElementById('next');
 const previous = document.getElementById('previous');
+const likeButton = document.getElementById('like');
 const currentProgress = document.getElementById('current-progress');
 const progressContainer = document.getElementById('progress-container');
 const shuffleButton = document.getElementById('shuffle');
@@ -15,25 +16,32 @@ const totalTime = document.getElementById('total-time');
 const Someday = {
     songName: 'Someday',
     artist: 'The Strokes',
-    file: 'The Strokes - Someday'
+    file: 'The Strokes - Someday',
+    liked: false
 };
 
 const Ambitionz_Az_A_Ridah = {
     songName: 'Ambitionz Az A Ridah',
     artist: '2Pac',
-    file: '2Pac - Ambitionz Az A Ridah'
+    file: '2Pac - Ambitionz Az A Ridah',
+    liked: false
 };
 
 const Earth_Wind_Fire = {
     songName: 'Let\'s Groove',
     artist: 'Earth, Wind and Fire',
-    file: 'Earth_Wind_Fire - Let s Groove'
+    file: 'Earth_Wind_Fire - Let s Groove',
+    liked: false
 };
 
 let isPlaying = false;
 let isShuffled = false;
 let repeatOn = false;
-const originalPlaylist = [Someday, Ambitionz_Az_A_Ridah, Earth_Wind_Fire];
+const originalPlaylist = JSON.parse(localStorage.getItem('playlist')) ?? [
+    Someday,
+    Ambitionz_Az_A_Ridah,
+    Earth_Wind_Fire,
+];
 let sortedPlaylist = [...originalPlaylist];
 let index = 0;
 
@@ -60,12 +68,25 @@ function playPauseDecider(){
     }
 }
 
+function likeButtonRender(){
+    if (sortedPlaylist[index].liked === true){
+        likeButton.querySelector('.bi').classList.remove('bi-heart');
+        likeButton.querySelector('.bi').classList.add('bi-heart-fill');
+        likeButton.classList.add('button-active');
+    }
+    else {
+        likeButton.querySelector('.bi').classList.add('bi-heart');
+        likeButton.querySelector('.bi').classList.remove('bi-heart-fill');
+        likeButton.classList.remove('button-active');
+    }
+}
 
 function initializeSong(){
     cover.src = `images/${sortedPlaylist[index].file}.jpg`;
     song.src = `songs/${sortedPlaylist[index].file}.mp3`;
     songName.innerText = sortedPlaylist[index].songName;
     bandName.innerText = sortedPlaylist[index].artist;
+    likeButtonRender();
 }
 
 function previousSong(){
@@ -160,6 +181,17 @@ function updateTotalTime() {
     totalTime.innerText = toHHMMSS(song.duration);
 }
 
+function likeButtonClicked() {
+    if(sortedPlaylist[index].liked === false){
+        sortedPlaylist[index].liked = true;
+    }
+    else {
+        sortedPlaylist[index].liked = false;
+    }
+    likeButtonRender();
+    localStorage.setItem('playlist', JSON.stringify(originalPlaylist));
+}
+
 initializeSong();
 
 play.addEventListener('click', playPauseDecider);
@@ -171,3 +203,4 @@ song.addEventListener('loadedmetadata', updateTotalTime);
 progressContainer.addEventListener('click', jumpTo);
 shuffleButton.addEventListener('click', shuffleButtonClicked);
 repeatButton.addEventListener('click', repeatButtonClicked);
+likeButton.addEventListener('click', likeButtonClicked);
